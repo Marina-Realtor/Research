@@ -1,165 +1,144 @@
-import OpenAI from 'openai';
 import { ResearchFinding, BlogTopic, UrgentItem } from '@/types';
 
 /**
- * Format the morning digest email using GPT-4o
+ * Format the morning digest email with structured template
  */
 export async function formatMorningEmail(
   findings: ResearchFinding[],
   blogTopics: BlogTopic[],
   urgentItems: UrgentItem[]
 ): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    console.warn('OPENAI_API_KEY not configured, using fallback format');
-    return generateFallbackMorningEmail(findings, blogTopics, urgentItems);
-  }
-
-  const openai = new OpenAI({ apiKey });
-
   // Organize findings by category
   const marketIntel = findings.filter((f) => f.category === 'market_intel');
   const redditPainPoints = findings.filter((f) => f.category === 'reddit_pain_points');
 
   // Filter blog topics
   const newTopics = blogTopics.filter((t) => !t.isDuplicate);
-  const duplicateTopics = blogTopics.filter((t) => t.isDuplicate);
 
-  const prompt = `Create a professional HTML email digest for Marina Ramirez, a real estate agent in El Paso, Texas who specializes in Fort Bliss military relocations and first-time home buyers.
+  const formattedDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
-This digest is EXCLUSIVELY focused on the El Paso, Texas real estate market. Write in a warm, professional tone. Marina is busy and needs actionable insights quickly.
+  // Build urgent items section
+  const urgentHtml = urgentItems.length > 0 ? `
+    <div class="highlight-section">
+      <div class="highlight-header">HIGH VALUE ITEMS</div>
+      ${urgentItems.map((item) => `
+        <div class="highlight-item">
+          <span class="priority-badge priority-${item.priority}">${item.priority}</span>
+          <p class="highlight-text">${item.summary}</p>
+          <span class="highlight-source">${item.source}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
 
-## Today's El Paso Market Research
+  // Build market intel section
+  const marketIntelHtml = marketIntel.length > 0 ? `
+    <h2>Market Intelligence</h2>
+    <div class="section-divider"></div>
+    ${marketIntel.map((f) => `
+      <article class="intel-card">
+        <h3>${f.query}</h3>
+        <p class="intel-insight">${f.mostImportantInsight}</p>
+        ${f.actionItems.length > 0 ? `
+          <div class="action-box">
+            <span class="action-label">Action Items</span>
+            <ul>
+              ${f.actionItems.map((a) => `<li>${a}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+        <div class="source">
+          ${f.sources.map((s) => `<a href="${s.url}">${s.title}</a>`).join(' · ')}
+        </div>
+      </article>
+    `).join('')}
+  ` : '';
 
-### Market Intelligence
-${marketIntel.map((f) => `
-**Query:** ${f.query}
-**Key Findings:** ${f.keyFindings.join('; ')}
-**Most Important:** ${f.mostImportantInsight}
-**Action Items:** ${f.actionItems.join('; ')}
-**Priority:** ${f.priority}
-**Sources:** ${f.sources.map((s) => `${s.title} (${s.url})`).join('; ')}
-`).join('\n')}
+  // Build reddit pain points section
+  const redditHtml = redditPainPoints.length > 0 ? `
+    <h2>Community Pulse</h2>
+    <p class="section-subtitle">What people are asking about El Paso & Fort Bliss</p>
+    <div class="section-divider"></div>
+    ${redditPainPoints.map((f) => `
+      <article class="pulse-card">
+        <h3 class="pulse-title">${f.query.replace('site:reddit.com ', '')}</h3>
+        <ul class="pulse-list">
+          ${f.painPoints.map((p) => `
+            <li>
+              <span class="pulse-text">${p.description}</span>
+              <span class="pulse-source">${p.source || ''}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </article>
+    `).join('')}
+  ` : '';
 
-### Reddit Pain Points (What People Are Asking About El Paso)
-${redditPainPoints.map((f) => `
-**Query:** ${f.query}
-**Pain Points:** ${f.painPoints.map((p) => p.description).join('; ')}
-**What People Want:** ${f.solutionRequests.join('; ')}
-**Action Items:** ${f.actionItems.join('; ')}
-**Sources:** ${f.sources.map((s) => `${s.title} (${s.url})`).join('; ')}
-`).join('\n')}
+  // Build blog topics section
+  const blogHtml = newTopics.length > 0 ? `
+    <h2>Content Opportunities</h2>
+    <p class="section-subtitle">Blog topics to capture organic traffic</p>
+    <div class="section-divider"></div>
+    <div class="topics-grid">
+      ${newTopics.map((t, i) => `
+        <div class="topic-card">
+          <span class="topic-number">${String(i + 1).padStart(2, '0')}</span>
+          <strong class="topic-title">${t.title}</strong>
+          <div class="topic-keywords">
+            ${t.targetKeywords.map((k) => `<span class="keyword">${k}</span>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
 
-${urgentItems.length > 0 ? `
-### Urgent Items Requiring Attention
-${urgentItems.map((item) => `- **${item.priority.toUpperCase()}:** ${item.summary} (Source: ${item.source})`).join('\n')}
-` : ''}
+  const bodyContent = `
+    <p class="greeting">Good morning, Marina.</p>
+    <p class="subgreeting">Here's your El Paso market intelligence for ${formattedDate}.</p>
+    ${urgentHtml}
+    ${marketIntelHtml}
+    ${redditHtml}
+    ${blogHtml}
+    <p class="signoff">That's all for today. Reach out if you'd like any of these expanded.</p>
+  `;
 
-### Blog Topic Recommendations for El Paso SEO
-${newTopics.length > 0 ? `
-**New Topics to Write:**
-${newTopics.map((t) => `- ${t.title} (Keywords: ${t.targetKeywords.join(', ')})`).join('\n')}
-` : 'No new blog topic recommendations today.'}
-
-${duplicateTopics.length > 0 ? `
-**Already Covered (skip these):**
-${duplicateTopics.map((t) => `- ${t.title} → Similar to: ${t.existingPostTitle}`).join('\n')}
-` : ''}
-
-Format as clean HTML email with:
-- ALL CONTENT CENTERED in the email
-- Teal (#0D9488) for headers and accents
-- Orange (#F97316) for urgent/important callouts
-- Clear section headers (centered)
-- Content blocks centered with max-width
-- ALWAYS include source links for each finding
-- Larger font sizes (body 16px, headers 18-26px)
-- Mobile-friendly centered layout
-- Professional but warm tone
-- No emojis
-- Include a brief greeting and sign-off
-- Focus on El Paso market only
-
-Return ONLY the HTML body content (no <html> or <head> tags, as these are already provided).`;
-
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional email writer for a real estate marketing firm. Write concise, actionable email digests. Return only HTML content, no markdown.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.3,
-      max_tokens: 4000,
-    });
-
-    const htmlContent = response.choices[0]?.message?.content || '';
-    return wrapEmailHtml(htmlContent);
-  } catch (error) {
-    console.error('OpenAI formatting error:', error);
-    return generateFallbackMorningEmail(findings, blogTopics, urgentItems);
-  }
+  return wrapEmailHtml(bodyContent);
 }
 
 /**
- * Format the evening catch-up email using GPT-4o
+ * Format the evening catch-up email with structured template
  */
 export async function formatEveningEmail(
   urgentItems: UrgentItem[]
 ): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey || urgentItems.length === 0) {
-    return generateFallbackEveningEmail(urgentItems);
+  if (urgentItems.length === 0) {
+    return wrapEmailHtml('<p>No new urgent items found this evening.</p>');
   }
 
-  const openai = new OpenAI({ apiKey });
+  const bodyContent = `
+    <p class="greeting">Good evening, Marina.</p>
+    <p class="subgreeting">${urgentItems.length} new update${urgentItems.length > 1 ? 's' : ''} found since this morning.</p>
 
-  const prompt = `Create a brief HTML email alert for Marina Ramirez about ${urgentItems.length} urgent real estate market update(s) found since this morning.
+    <div class="highlight-section">
+      <div class="highlight-header">EVENING UPDATES</div>
+      ${urgentItems.map((item) => `
+        <div class="highlight-item">
+          <span class="priority-badge priority-${item.priority}">${item.priority}</span>
+          <p class="highlight-text">${item.summary}</p>
+          <span class="highlight-source">${item.source}</span>
+        </div>
+      `).join('')}
+    </div>
 
-## Urgent Items
-${urgentItems.map((item) => `
-- **${item.priority.toUpperCase()}:** ${item.summary}
-  Source: ${item.source}
-  Category: ${item.category}
-`).join('\n')}
+    <p class="signoff">Review these and take action if needed.</p>
+  `;
 
-Format as a clean, mobile-friendly HTML email:
-- Yellow (#FEF3C7) alert box at the top
-- Orange (#F97316) border for emphasis
-- Teal (#0D9488) for headers
-- Brief greeting acknowledging it's an evening update
-- Clear action items if applicable
-- Keep it short - this is a quick alert, not a full digest
-- No emojis
-- Professional tone
-
-Return ONLY the HTML body content.`;
-
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional email writer. Create brief, urgent alert emails. Return only HTML content.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.3,
-      max_tokens: 1500,
-    });
-
-    const htmlContent = response.choices[0]?.message?.content || '';
-    return wrapEmailHtml(htmlContent);
-  } catch (error) {
-    console.error('OpenAI evening formatting error:', error);
-    return generateFallbackEveningEmail(urgentItems);
-  }
+  return wrapEmailHtml(bodyContent);
 }
 
 /**
@@ -236,23 +215,49 @@ function wrapEmailHtml(bodyContent: string): string {
     h3 {
       font-size: 16px;
       font-weight: 600;
+      color: #1F2937;
       margin: 0 0 12px 0;
     }
     p { font-size: 15px; margin: 16px 0; }
+    .greeting {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: #1F2937;
+      margin: 0 0 4px 0;
+    }
+    .subgreeting {
+      font-size: 15px;
+      color: #6B7280;
+      margin: 0 0 32px 0;
+    }
+    .section-subtitle {
+      font-size: 14px;
+      color: #6B7280;
+      margin: 0 0 16px 0;
+    }
+    .signoff {
+      font-size: 15px;
+      color: #6B7280;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #E5E7EB;
+    }
     .section-divider {
       width: 40px;
       height: 2px;
       background: #0D9488;
       margin-bottom: 28px;
     }
-    .urgent {
+    /* Highlight Section (High Value Items) */
+    .highlight-section {
       background: #F9FAFB;
       border: 1px solid #E5E7EB;
       border-radius: 8px;
       padding: 24px;
-      margin: 24px 0 40px 0;
+      margin: 0 0 40px 0;
     }
-    .urgent-header {
+    .highlight-header {
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.1em;
@@ -260,13 +265,24 @@ function wrapEmailHtml(bodyContent: string): string {
       color: #6B7280;
       margin-bottom: 20px;
     }
-    .urgent-item {
+    .highlight-item {
       padding: 16px 0;
       border-bottom: 1px solid #E5E7EB;
     }
-    .urgent-item:last-child {
+    .highlight-item:last-child {
       border-bottom: none;
       padding-bottom: 0;
+    }
+    .highlight-text {
+      font-size: 15px;
+      line-height: 1.55;
+      color: #1F2937;
+      margin: 0 0 8px 0;
+    }
+    .highlight-source {
+      font-size: 13px;
+      color: #6B7280;
+      font-style: italic;
     }
     .priority-badge {
       display: inline-block;
@@ -286,20 +302,22 @@ function wrapEmailHtml(bodyContent: string): string {
       background: #F0FDFA;
       color: #0D9488;
     }
-    .high-priority { color: #C2410C; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
-    .action-item {
+    .priority-medium {
+      background: #F9FAFB;
+      color: #6B7280;
+    }
+    /* Intel Cards */
+    .intel-card {
       padding: 24px 0;
       border-bottom: 1px solid #E5E7EB;
     }
-    .action-item:last-child { border-bottom: none; }
-    .action-item strong {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1F2937;
-      display: block;
-      margin-bottom: 12px;
+    .intel-card:last-child { border-bottom: none; }
+    .intel-insight {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #374151;
+      margin: 0 0 16px 0;
     }
-    .action-item p { font-size: 15px; line-height: 1.65; color: #374151; margin: 0 0 16px 0; }
     .action-box {
       background: #F9FAFB;
       padding: 16px;
@@ -319,26 +337,75 @@ function wrapEmailHtml(bodyContent: string): string {
     li { font-size: 14px; color: #374151; margin: 6px 0; line-height: 1.5; }
     a { color: #0D9488; text-decoration: none; }
     a:hover { color: #0F766E; }
-    .source { font-size: 13px; color: #6B7280; }
+    .source { font-size: 13px; color: #6B7280; margin-top: 12px; }
     .source a { font-size: 13px; }
-    .blog-topic {
+    /* Pulse Cards (Community) */
+    .pulse-card {
+      padding: 20px 0;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .pulse-card:last-child { border-bottom: none; }
+    .pulse-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1F2937;
+      margin: 0 0 12px 0;
+      text-transform: capitalize;
+    }
+    .pulse-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .pulse-list li {
+      display: block;
+      padding: 8px 0;
+      border-bottom: 1px dashed #E5E7EB;
+    }
+    .pulse-list li:last-child { border-bottom: none; }
+    .pulse-text {
+      font-size: 14px;
+      color: #374151;
+    }
+    .pulse-source {
+      font-size: 12px;
+      color: #6B7280;
+      background: #F9FAFB;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+    /* Topics Grid */
+    .topics-grid {
+      display: block;
+    }
+    .topic-card {
       padding: 20px;
       background: #F9FAFB;
       border-radius: 6px;
       margin: 16px 0;
+      position: relative;
     }
-    .blog-topic strong {
+    .topic-number {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 32px;
+      color: #E5E7EB;
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      line-height: 1;
+    }
+    .topic-title {
       font-size: 15px;
       font-weight: 600;
       color: #1F2937;
       display: block;
       margin-bottom: 12px;
+      padding-right: 40px;
       line-height: 1.4;
     }
-    .keywords {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    .topic-keywords {
+      display: block;
     }
     .keyword {
       font-size: 11px;
@@ -348,6 +415,7 @@ function wrapEmailHtml(bodyContent: string): string {
       border-radius: 4px;
       border: 1px solid #E5E7EB;
       display: inline-block;
+      margin: 3px 3px 3px 0;
     }
     .duplicate { opacity: 0.5; }
     .footer {
