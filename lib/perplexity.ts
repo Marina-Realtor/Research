@@ -238,7 +238,7 @@ export async function getTrendingBlogTopics(): Promise<string[]> {
     return [];
   }
 
-  const prompt = `As a real estate SEO expert, suggest 5 blog topics for a realtor in El Paso, Texas who specializes in:
+  const prompt = `As a real estate SEO expert, suggest 3 blog topics for a realtor in El Paso, Texas who specializes in:
 - Fort Bliss military relocations and PCS moves
 - First-time home buyers
 - Local neighborhoods (especially safe areas)

@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 
 const EMAIL_CONFIG = {
   from: 'Marina Research <noreply@marina-ramirez.com>',
-  to: 'Info@marina-ramirez.com',
+  to: ['Info@marina-ramirez.com', 'hello@edwardguillen.com'],
 };
 
 /**

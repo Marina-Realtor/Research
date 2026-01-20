@@ -43,16 +43,24 @@ export async function GET(request: Request): Promise<NextResponse> {
     errors.push(...queryErrors);
     console.log(`Processed ${findings.length} queries with ${queryErrors.length} errors`);
 
-    // Step 2: Get trending blog topics
-    console.log('Step 2: Getting trending blog topics...');
+    // Step 2: Get trending blog topics (only on Mondays)
+    console.log('Step 2: Checking for blog topics...');
     let trendingTopics: string[] = [];
-    try {
-      trendingTopics = await getTrendingBlogTopics();
-      console.log(`Found ${trendingTopics.length} trending topics`);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      errors.push(`Blog topics error: ${errorMsg}`);
-      console.error('Failed to get trending topics:', error);
+    const today = new Date();
+    const isMonday = today.getDay() === 1;
+
+    if (isMonday) {
+      console.log('Today is Monday - fetching blog topics...');
+      try {
+        trendingTopics = await getTrendingBlogTopics();
+        console.log(`Found ${trendingTopics.length} trending topics`);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        errors.push(`Blog topics error: ${errorMsg}`);
+        console.error('Failed to get trending topics:', error);
+      }
+    } else {
+      console.log('Not Monday - skipping blog topics');
     }
 
     // Step 3: Check existing blog posts
