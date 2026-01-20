@@ -28,9 +28,9 @@ export async function formatMorningEmail(
 
   const prompt = `Create a professional HTML email digest for Marina Ramirez, a real estate agent in El Paso, Texas who specializes in Fort Bliss military relocations and first-time home buyers.
 
-Write in a warm, professional tone. Marina is busy and needs actionable insights quickly.
+This digest is EXCLUSIVELY focused on the El Paso, Texas real estate market. Write in a warm, professional tone. Marina is busy and needs actionable insights quickly.
 
-## Today's Research Findings
+## Today's El Paso Market Research
 
 ### Market Intelligence
 ${marketIntel.map((f) => `
@@ -39,22 +39,24 @@ ${marketIntel.map((f) => `
 **Most Important:** ${f.mostImportantInsight}
 **Action Items:** ${f.actionItems.join('; ')}
 **Priority:** ${f.priority}
+**Sources:** ${f.sources.map((s) => `${s.title} (${s.url})`).join('; ')}
 `).join('\n')}
 
-### Reddit Pain Points (What People Are Asking)
+### Reddit Pain Points (What People Are Asking About El Paso)
 ${redditPainPoints.map((f) => `
 **Query:** ${f.query}
 **Pain Points:** ${f.painPoints.map((p) => p.description).join('; ')}
 **What People Want:** ${f.solutionRequests.join('; ')}
 **Action Items:** ${f.actionItems.join('; ')}
+**Sources:** ${f.sources.map((s) => `${s.title} (${s.url})`).join('; ')}
 `).join('\n')}
 
 ${urgentItems.length > 0 ? `
 ### Urgent Items Requiring Attention
-${urgentItems.map((item) => `- **${item.priority.toUpperCase()}:** ${item.summary}`).join('\n')}
+${urgentItems.map((item) => `- **${item.priority.toUpperCase()}:** ${item.summary} (Source: ${item.source})`).join('\n')}
 ` : ''}
 
-### Blog Topic Recommendations
+### Blog Topic Recommendations for El Paso SEO
 ${newTopics.length > 0 ? `
 **New Topics to Write:**
 ${newTopics.map((t) => `- ${t.title} (Keywords: ${t.targetKeywords.join(', ')})`).join('\n')}
@@ -66,16 +68,20 @@ ${duplicateTopics.map((t) => `- ${t.title} → Similar to: ${t.existingPostTitle
 ` : ''}
 
 Format as clean HTML email with:
+- ALL CONTENT CENTERED in the email
 - Teal (#0D9488) for headers and accents
 - Orange (#F97316) for urgent/important callouts
-- Clear section headers
-- Bullet points for easy scanning
-- Mobile-friendly layout
+- Clear section headers (centered)
+- Content blocks centered with max-width
+- ALWAYS include source links for each finding
+- Larger font sizes (body 16px, headers 18-26px)
+- Mobile-friendly centered layout
 - Professional but warm tone
 - No emojis
 - Include a brief greeting and sign-off
+- Focus on El Paso market only
 
-Return ONLY the HTML body content (no <html> or <head> tags).`;
+Return ONLY the HTML body content (no <html> or <head> tags, as these are already provided).`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -168,58 +174,86 @@ function wrapEmailHtml(bodyContent: string): string {
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
+      line-height: 1.7;
       color: #1F2937;
-      max-width: 600px;
+      max-width: 650px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 24px;
       background-color: #ffffff;
+      text-align: center;
     }
-    h1, h2, h3 { color: #0D9488; margin-top: 24px; }
-    h1 { font-size: 24px; border-bottom: 2px solid #0D9488; padding-bottom: 8px; }
-    h2 { font-size: 20px; }
-    h3 { font-size: 16px; }
+    h1, h2, h3 { color: #0D9488; margin-top: 28px; text-align: center; }
+    h1 { font-size: 26px; border-bottom: 2px solid #0D9488; padding-bottom: 10px; }
+    h2 { font-size: 22px; }
+    h3 { font-size: 18px; }
+    p { font-size: 16px; text-align: center; }
     .urgent {
       background-color: #FEF3C7;
       border-left: 4px solid #F97316;
-      padding: 12px 16px;
-      margin: 16px 0;
-      border-radius: 4px;
+      padding: 14px 18px;
+      margin: 18px auto;
+      border-radius: 6px;
+      text-align: left;
+      max-width: 580px;
     }
-    .high-priority { color: #F97316; font-weight: bold; }
+    .high-priority { color: #F97316; font-weight: bold; font-size: 15px; }
     .action-item {
       background-color: #F0FDFA;
-      padding: 8px 12px;
-      margin: 4px 0;
-      border-radius: 4px;
-      border-left: 3px solid #0D9488;
+      padding: 12px 16px;
+      margin: 8px auto;
+      border-radius: 6px;
+      border-left: 4px solid #0D9488;
+      text-align: left;
+      max-width: 580px;
     }
-    ul { padding-left: 20px; }
-    li { margin: 8px 0; }
-    a { color: #0D9488; }
+    .action-item strong { font-size: 16px; }
+    .action-item p { font-size: 15px; text-align: left; margin: 8px 0; }
+    ul { padding-left: 24px; text-align: left; max-width: 580px; margin: 0 auto; }
+    li { margin: 10px 0; font-size: 15px; }
+    a { color: #0D9488; font-size: 15px; }
+    .source { font-size: 13px; color: #6B7280; font-style: italic; margin-top: 6px; }
     .footer {
-      margin-top: 32px;
-      padding-top: 16px;
+      margin-top: 36px;
+      padding-top: 18px;
       border-top: 1px solid #E5E7EB;
-      font-size: 12px;
+      font-size: 13px;
       color: #6B7280;
+      text-align: center;
     }
     .blog-topic {
       background-color: #F9FAFB;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 4px;
+      padding: 14px;
+      margin: 10px auto;
+      border-radius: 6px;
+      text-align: left;
+      max-width: 580px;
     }
+    .blog-topic strong { font-size: 16px; }
+    .blog-topic small { font-size: 14px; }
     .duplicate {
       opacity: 0.6;
       text-decoration: line-through;
     }
+    .market-header {
+      background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    .market-header h1 { color: white; border-bottom: none; margin: 0; font-size: 28px; }
+    .market-header p { color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 15px; }
   </style>
 </head>
 <body>
+<div class="market-header">
+  <h1>El Paso Market Intelligence</h1>
+  <p>Daily Research Digest for Marina Ramirez</p>
+</div>
 ${bodyContent}
 <div class="footer">
   <p>This is an automated research digest from your Marina Research system.</p>
+  <p>Focused exclusively on the El Paso, Texas real estate market.</p>
   <p>research.marina-ramirez.com</p>
 </div>
 </body>
@@ -240,41 +274,41 @@ function generateFallbackMorningEmail(
 
   const urgentHtml = urgentItems.length > 0
     ? `<div class="urgent">
-        <h3>Urgent Items</h3>
+        <h3 style="text-align: left; margin-top: 0;">Urgent Items</h3>
         <ul>
-          ${urgentItems.map((item) => `<li><span class="high-priority">${item.priority.toUpperCase()}:</span> ${item.summary}</li>`).join('')}
+          ${urgentItems.map((item) => `<li><span class="high-priority">${item.priority.toUpperCase()}:</span> ${item.summary}<br><span class="source">Source: ${item.source}</span></li>`).join('')}
         </ul>
       </div>`
     : '';
 
   const bodyContent = `
-<h1>Daily Research Digest</h1>
-<p>Good morning, Marina. Here's your research update for ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.</p>
+<p>Good morning, Marina. Here's your El Paso market research update for ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.</p>
 
 ${urgentHtml}
 
-<h2>Market Intelligence</h2>
+<h2>El Paso Market Intelligence</h2>
 ${marketIntel.map((f) => `
 <div class="action-item">
   <strong>${f.query}</strong>
   <p>${f.mostImportantInsight}</p>
   ${f.actionItems.length > 0 ? `<p><em>Action:</em> ${f.actionItems[0]}</p>` : ''}
+  ${f.sources.length > 0 ? `<p class="source">Source: <a href="${f.sources[0].url}">${f.sources[0].title}</a></p>` : ''}
 </div>
 `).join('')}
 
 <h2>Reddit Pain Points</h2>
 <p>What people are asking about El Paso and Fort Bliss:</p>
 <ul>
-${redditPainPoints.flatMap((f) => f.painPoints.map((p) => `<li>${p.description}</li>`)).join('')}
+${redditPainPoints.flatMap((f) => f.painPoints.map((p) => `<li>${p.description}${p.source ? `<br><span class="source">Source: ${p.source}</span>` : ''}</li>`)).join('')}
 </ul>
 
-<h2>Blog Topic Ideas</h2>
+<h2>Blog Topic Ideas for El Paso SEO</h2>
 ${newTopics.length > 0
-  ? `<ul>${newTopics.map((t) => `<li class="blog-topic"><strong>${t.title}</strong><br><small>Keywords: ${t.targetKeywords.join(', ')}</small></li>`).join('')}</ul>`
+  ? newTopics.map((t) => `<div class="blog-topic"><strong>${t.title}</strong><br><small>Target Keywords: ${t.targetKeywords.join(', ')}</small></div>`).join('')
   : '<p>No new blog topics recommended today.</p>'}
 
-<p style="margin-top: 24px;">Have a great day!</p>
-<p><em>Note: This email was formatted with the fallback system due to a processing issue.</em></p>
+<p style="margin-top: 28px;">Have a great day!</p>
+<p><em style="font-size: 13px;">Note: This email was formatted with the fallback system due to a processing issue.</em></p>
 `;
 
   return wrapEmailHtml(bodyContent);
