@@ -1,0 +1,11 @@
+# Marina Research - Automated Research System
+# This subdomain should not be indexed
+
+User-agent: *
+Disallow: /
+
+# Block all API endpoints
+User-agent: *
+Disallow: /api/
+
+# No sitemap - this is an internal tool
