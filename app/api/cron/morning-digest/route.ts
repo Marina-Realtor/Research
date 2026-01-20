@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processQueries, getTrendingBlogTopics, isUrgentResult } from '@/lib/perplexity';
-import { formatMorningEmail } from '@/lib/openai';
+import { formatMorningEmail } from '@/lib/emailTemplates';
 import { sendMorningDigest, sendErrorNotification } from '@/lib/resend';
 import { checkAllBlogs, checkTopicsForDuplicates } from '@/lib/blogChecker';
 import { saveMorningUrgentItems, findingToUrgentItem } from '@/lib/urgentTracker';

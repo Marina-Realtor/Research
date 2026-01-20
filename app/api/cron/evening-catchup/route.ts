@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processQueries, isUrgentResult } from '@/lib/perplexity';
-import { formatEveningEmail } from '@/lib/openai';
+import { formatEveningEmail } from '@/lib/emailTemplates';
 import { sendEveningCatchup } from '@/lib/resend';
 import {
   loadMorningUrgentItems,
