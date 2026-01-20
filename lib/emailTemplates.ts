@@ -1,6 +1,35 @@
 import { ResearchFinding, BlogTopic, UrgentItem } from '@/types';
 
 /**
+ * Get a random motivational message
+ */
+function getRandomMotivation(): string {
+  const messages = [
+    "Keep pushing forward — your hustle is paying off.",
+    "Every client you help is a family finding their home.",
+    "Stay focused, stay driven, stay winning.",
+    "You've got this. Now go close some deals.",
+    "Success is built one showing at a time.",
+    "Your dedication sets you apart.",
+    "Today's effort is tomorrow's success.",
+    "Keep grinding — the results will follow.",
+    "Champions show up every single day.",
+    "Trust the process. Trust yourself.",
+    "Échale ganas — you're unstoppable.",
+    "Si se puede. Always.",
+    "Dale con todo hoy.",
+    "El éxito no es casualidad — es trabajo duro.",
+    "Pa'lante siempre, pa'trás ni para coger impulso.",
+    "Hoy es un buen día para cerrar un trato.",
+    "Tu esfuerzo de hoy es el éxito de mañana.",
+    "A darle que es mole de olla.",
+    "No hay atajos — solo dedicación.",
+    "Sigue adelante, vas muy bien.",
+  ];
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
+/**
  * Format the morning digest email with structured template
  */
 export async function formatMorningEmail(
@@ -99,12 +128,12 @@ export async function formatMorningEmail(
 
   const bodyContent = `
     <p class="greeting">Good morning, Marina.</p>
-    <p class="subgreeting">Here's your El Paso market intelligence for ${formattedDate}.</p>
+    <p class="subgreeting">Here's what we found for the El Paso market on ${formattedDate}.</p>
     ${urgentHtml}
     ${marketIntelHtml}
     ${redditHtml}
     ${blogHtml}
-    <p class="signoff">That's all for today. Reach out if you'd like any of these expanded.</p>
+    <p class="motivation">${getRandomMotivation()}</p>
   `;
 
   return wrapEmailHtml(bodyContent);
@@ -122,7 +151,7 @@ export async function formatEveningEmail(
 
   const bodyContent = `
     <p class="greeting">Good evening, Marina.</p>
-    <p class="subgreeting">${urgentItems.length} new update${urgentItems.length > 1 ? 's' : ''} found since this morning.</p>
+    <p class="subgreeting">We found ${urgentItems.length} new update${urgentItems.length > 1 ? 's' : ''} since this morning.</p>
 
     <div class="highlight-section">
       <div class="highlight-header">EVENING UPDATES</div>
@@ -135,7 +164,7 @@ export async function formatEveningEmail(
       `).join('')}
     </div>
 
-    <p class="signoff">Review these and take action if needed.</p>
+    <p class="motivation">${getRandomMotivation()}</p>
   `;
 
   return wrapEmailHtml(bodyContent);
@@ -239,6 +268,15 @@ function wrapEmailHtml(bodyContent: string): string {
     .signoff {
       font-size: 15px;
       color: #6B7280;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #E5E7EB;
+    }
+    .motivation {
+      font-size: 16px;
+      font-style: italic;
+      color: #0D9488;
+      text-align: center;
       margin-top: 40px;
       padding-top: 24px;
       border-top: 1px solid #E5E7EB;
