@@ -128,7 +128,7 @@ export async function formatMorningEmail(
 
   const bodyContent = `
     <p class="greeting">Good morning, Marina.</p>
-    <p class="subgreeting">Here's what we found for the El Paso market on ${formattedDate}.</p>
+    <p class="subgreeting">We put together your El Paso market intelligence for ${formattedDate}.</p>
     ${urgentHtml}
     ${marketIntelHtml}
     ${redditHtml}
