@@ -2,11 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/morning-digest",
-      "schedule": "30 13 * * *"
-    },
-    {
-      "path": "/api/cron/evening-catchup",
-      "schedule": "0 2 * * *"
+      "schedule": "30 14 * * *"
     }
   ]
 }
