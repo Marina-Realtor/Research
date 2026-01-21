@@ -271,7 +271,8 @@ Return ONLY a JSON array of objects:
     });
 
     if (!response.ok) {
-      console.error('Failed to get blog topics');
+      const errorText = await response.text();
+      console.error(`Failed to get blog topics: HTTP ${response.status} - ${errorText}`);
       return [];
     }
 

@@ -65,7 +65,8 @@ Only return the JSON array, nothing else. If you cannot find any blog posts, ret
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch blog posts');
+      const errorText = await response.text();
+      console.error(`Failed to fetch blog posts: HTTP ${response.status} - ${errorText}`);
       return [];
     }
 
