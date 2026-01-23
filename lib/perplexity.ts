@@ -47,7 +47,7 @@ Return a JSON object with:
 }
 
 If there is NO urgent news, return priority "low" with keyFindings stating "No urgent updates found in the last 24 hours."`
-    : `You are a real estate market research assistant for Marina Ramirez, a realtor in El Paso, Texas specializing in Fort Bliss military relocations and first-time home buyers.
+    : `You are a real estate market research assistant for Marina Ramirez, a realtor in El Paso, Texas.
 
 Analyze the search results and extract actionable insights.
 
@@ -62,14 +62,18 @@ Return a JSON object with:
   "sources": [{"title": "source name", "url": "url"}]
 }
 
-Focus on:
-- El Paso real estate market trends
-- Fort Bliss military housing and BAH information
-- First-time home buyer pain points and needs
-- Neighborhood safety concerns
-- PCS relocation advice
-- Down payment assistance programs
-- New construction opportunities in Horizon City and Eastlake`;
+Focus areas (in priority order):
+1. El Paso real estate market trends (PRIMARY)
+   - Market conditions, pricing, inventory
+   - Neighborhood safety and guides
+   - New construction in Horizon City and Eastlake
+2. First-time home buyers (SECONDARY)
+   - Pain points and common questions
+   - Down payment assistance programs
+   - Buying process guidance
+3. Fort Bliss military (TERTIARY)
+   - BAH rates and housing info
+   - PCS relocation advice`;
 
   try {
     const response = await fetch(PERPLEXITY_API_URL, {
@@ -238,13 +242,14 @@ export async function getTrendingBlogTopics(): Promise<string[]> {
     return [];
   }
 
-  const prompt = `As a real estate SEO expert, suggest 3 blog topics for a realtor in El Paso, Texas who specializes in:
-- Fort Bliss military relocations and PCS moves
-- First-time home buyers
-- Local neighborhoods (especially safe areas)
-- New construction in Horizon City and Eastlake
-- Down payment assistance programs
+  const prompt = `As a real estate SEO expert, suggest 3 blog topics for a realtor in El Paso, Texas.
 
+Focus areas (in priority order):
+1. El Paso Real Estate (PRIMARY) - market trends, neighborhoods, new construction in Horizon City/Eastlake
+2. First-Time Home Buyers (SECONDARY) - down payment assistance, buying tips, local programs
+3. Fort Bliss Military (TERTIARY) - PCS moves, BAH rates, military housing
+
+Prioritize topics about El Paso real estate and first-time buyers over military-specific content.
 Focus on topics with high search intent that would attract potential clients. Consider local SEO opportunities.
 
 Return ONLY a JSON array of objects:

@@ -4,6 +4,7 @@ import { formatMorningEmail } from '@/lib/emailTemplates';
 import { sendMorningDigest, sendErrorNotification } from '@/lib/resend';
 import { checkAllBlogs, checkTopicsForDuplicates } from '@/lib/blogChecker';
 import { saveMorningUrgentItems, findingToUrgentItem } from '@/lib/urgentTracker';
+import { filterDuplicateFindings, markFindingsAsCovered } from '@/lib/coveredTopics';
 import { getMorningQueries } from '@/lib/queries';
 import { CronJobResult, UrgentItem, BlogTopic } from '@/types';
 
@@ -39,9 +40,14 @@ export async function GET(request: Request): Promise<NextResponse> {
     // Step 1: Process all morning queries
     console.log('Step 1: Processing morning queries...');
     const queries = getMorningQueries();
-    const { findings, errors: queryErrors } = await processQueries(queries, false);
+    const { findings: rawFindings, errors: queryErrors } = await processQueries(queries, false);
     errors.push(...queryErrors);
-    console.log(`Processed ${findings.length} queries with ${queryErrors.length} errors`);
+    console.log(`Processed ${rawFindings.length} queries with ${queryErrors.length} errors`);
+
+    // Step 1b: Filter out already-covered topics
+    console.log('Step 1b: Filtering duplicate/already-covered topics...');
+    const { newFindings: findings, duplicateCount } = await filterDuplicateFindings(rawFindings);
+    console.log(`Filtered ${duplicateCount} duplicates, ${findings.length} new findings remain`);
 
     // Step 2: Get trending blog topics (only on Mondays)
     console.log('Step 2: Checking for blog topics...');
@@ -109,6 +115,18 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     if (!emailResult.success) {
       errors.push(`Email send error: ${emailResult.error}`);
+    }
+
+    // Step 8: Mark findings as covered (so they won't repeat next week)
+    if (emailResult.success && findings.length > 0) {
+      console.log('Step 8: Marking findings as covered...');
+      try {
+        await markFindingsAsCovered(findings);
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        errors.push(`Failed to mark findings as covered: ${errorMsg}`);
+        console.error('Failed to mark findings as covered:', error);
+      }
     }
 
     // Send error notification if too many errors

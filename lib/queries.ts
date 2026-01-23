@@ -3,15 +3,11 @@ import { ResearchQuery, ProjectName } from '@/types';
 // Blog URL for duplicate checking
 export const BLOG_URL = 'https://www.marina-ramirez.com/en/blog';
 
-// Morning queries - Market Intel
+// Morning queries - Market Intel (Priority: El Paso Real Estate > First-Time Buyers > Fort Bliss)
 const MORNING_MARKET_INTEL: ResearchQuery[] = [
+  // El Paso Real Estate (Primary Focus)
   {
     query: 'El Paso Texas real estate market update 2026',
-    project: 'marina',
-    category: 'market_intel',
-  },
-  {
-    query: 'Fort Bliss BAH rates 2026',
     project: 'marina',
     category: 'market_intel',
   },
@@ -20,6 +16,7 @@ const MORNING_MARKET_INTEL: ResearchQuery[] = [
     project: 'marina',
     category: 'market_intel',
   },
+  // First-Time Home Buyers (Secondary Focus)
   {
     query: 'first time home buyer El Paso down payment assistance',
     project: 'marina',
@@ -30,22 +27,36 @@ const MORNING_MARKET_INTEL: ResearchQuery[] = [
     project: 'marina',
     category: 'market_intel',
   },
+  // Fort Bliss (Tertiary Focus)
+  {
+    query: 'Fort Bliss BAH rates 2026',
+    project: 'marina',
+    category: 'market_intel',
+  },
 ];
 
-// Morning queries - Reddit Pain Points
+// Morning queries - Reddit Pain Points (Priority: El Paso > First-Time Buyers > Fort Bliss)
 const MORNING_REDDIT: ResearchQuery[] = [
+  // El Paso General
   {
     query: 'site:reddit.com moving to El Paso',
     project: 'marina',
     category: 'reddit_pain_points',
   },
   {
-    query: 'site:reddit.com Fort Bliss housing advice',
+    query: 'site:reddit.com El Paso neighborhoods safe',
     project: 'marina',
     category: 'reddit_pain_points',
   },
+  // First-Time Buyers
   {
-    query: 'site:reddit.com El Paso neighborhoods safe',
+    query: 'site:reddit.com first time home buyer Texas tips',
+    project: 'marina',
+    category: 'reddit_pain_points',
+  },
+  // Fort Bliss
+  {
+    query: 'site:reddit.com Fort Bliss housing advice',
     project: 'marina',
     category: 'reddit_pain_points',
   },
@@ -126,13 +137,16 @@ export function getQueryCounts(): {
  */
 export function getBlogFocus(): string[] {
   return [
+    // El Paso Real Estate (Primary)
     'El Paso Texas real estate',
-    'Fort Bliss military housing',
-    'First-time home buyers El Paso',
-    'PCS relocation Fort Bliss',
     'El Paso neighborhoods guide',
-    'BAH housing allowance El Paso',
     'New construction Horizon City Eastlake',
+    // First-Time Buyers (Secondary)
+    'First-time home buyers El Paso',
     'Down payment assistance programs Texas',
+    // Fort Bliss (Tertiary)
+    'Fort Bliss military housing',
+    'PCS relocation Fort Bliss',
+    'BAH housing allowance El Paso',
   ];
 }
